@@ -36,7 +36,7 @@ var app = (function () {
         //subscribe to /topic/TOPICXX when connections succeed
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
-            stompClient.subscribe('/topic/TOPICXX', function (eventbody) {
+            stompClient.subscribe('/topic/newpoint', function (eventbody) {
                 
                 
             });
@@ -59,6 +59,7 @@ var app = (function () {
             var pt=new Point(px,py);
             console.info("publishing point at "+pt);
             addPointToCanvas(pt);
+            stompClient.send("/topic/newpoint", {}, JSON.stringify(pts));
 
             //publicar el evento
         },
