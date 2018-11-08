@@ -37,10 +37,22 @@ var app = (function () {
         //subscribe to /topic/TOPICXX when connections succeed
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
-            stompClient.subscribe('/topic/newpoint.' + topic, function (eventbody) {
+            stompClient.subscribe('/app/newpolygon.' + topic, function (eventbody) {
                 var theObject=JSON.parse(eventbody.body);
                 //alert("coordenada x : " + theObject.x + "  coordenada y :" + theObject.y);
-                addPointToCanvas(new Point(theObject.x,theObject.y));
+                //addPointToCanvas(new Point(theObject.x,theObject.y));
+                var canvas = document.getElementById("canvas");
+                var ctx = canvas.getContext("2d");
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                for (let i = 0; i < theObject.length - 1; i++){
+                    ctx.moveTo(theObject[i].x, theObject[i].y);
+                    ctx.lineTo(theObject[i + 1].x, theObject[i + 1].y);
+                }
+                ctx.moveTo(theObject[theObject.length - 1].x, theObject[theObject.length - 1].y);
+                ctx.lineTo(theObject[0].x, theObject[0].y)
+                ctx.stroke();
             });
         });
 
@@ -72,7 +84,7 @@ var app = (function () {
             var pt=new Point(px,py);
             console.info("publishing point at "+pt);
             //addPointToCanvas(pt);
-            stompClient.send("/topic/newpoint." + topic, {}, JSON.stringify(pt));
+            stompClient.send("/app/newpoint." + topic, {}, JSON.stringify(pt));
 
             //publicar el evento
         },
@@ -88,6 +100,9 @@ var app = (function () {
 
         topicSuscription: function (topicid){
             topic = topicid;
+            var canvas = document.getElementById("canvas");
+            var ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
             connectAndSubscribe();
         }
     };
