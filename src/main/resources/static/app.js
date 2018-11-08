@@ -8,6 +8,7 @@ var app = (function () {
     }
     
     var stompClient = null;
+    var topic = null;
 
     var addPointToCanvas = function (point) {        
         var canvas = document.getElementById("canvas");
@@ -36,7 +37,7 @@ var app = (function () {
         //subscribe to /topic/TOPICXX when connections succeed
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
-            stompClient.subscribe('/topic/newpoint', function (eventbody) {
+            stompClient.subscribe('/topic/newpoint.' + topic, function (eventbody) {
                 var theObject=JSON.parse(eventbody.body);
                 //alert("coordenada x : " + theObject.x + "  coordenada y :" + theObject.y);
                 addPointToCanvas(new Point(theObject.x,theObject.y));
@@ -64,14 +65,14 @@ var app = (function () {
             }
 
             //websocket connection
-            connectAndSubscribe();
+            //connectAndSubscribe();
         },
 
         publishPoint: function(px,py){
             var pt=new Point(px,py);
             console.info("publishing point at "+pt);
             //addPointToCanvas(pt);
-            stompClient.send("/topic/newpoint", {}, JSON.stringify(pt));
+            stompClient.send("/topic/newpoint." + topic, {}, JSON.stringify(pt));
 
             //publicar el evento
         },
@@ -82,6 +83,12 @@ var app = (function () {
             }
             setConnected(false);
             console.log("Disconnected");
+        },
+
+
+        topicSuscription: function (topicid){
+            topic = topicid;
+            connectAndSubscribe();
         }
     };
 
