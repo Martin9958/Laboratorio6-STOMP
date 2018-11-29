@@ -32,7 +32,15 @@ public class STOMPMessagesHandler {
                poligonos.put(numdibujo,new ArrayList<Point>());
            }
            else{
-               poligonos.get(numdibujo).add(pt);
+               if(poligonos.get(numdibujo).size()<=3){
+                   poligonos.get(numdibujo).add(pt);
+               }
+               else{
+                   poligonos.clear();
+                   poligonos.put(numdibujo,new ArrayList<Point>());
+                   poligonos.get(numdibujo).add(pt);
+
+               }
                System.out.println("Nuevo punto recibido en el servidor!: "+pt);
                msgt.convertAndSend("/topic/newpoint."+numdibujo,pt);
            }
