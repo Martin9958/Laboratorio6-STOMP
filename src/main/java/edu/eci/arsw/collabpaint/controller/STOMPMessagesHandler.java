@@ -27,18 +27,20 @@ public class STOMPMessagesHandler {
     @MessageMapping("/newpoint.{numdibujo}")
     public void handlePointEvent(Point pt, @DestinationVariable String numdibujo) throws Exception{
 
-        if(!poligonos.containsKey(numdibujo)){
-            poligonos.put(numdibujo,new ArrayList<Point>());
-        }
-        else{
-            poligonos.get(numdibujo).add(pt);
-            System.out.println("Nuevo punto recibido en el servidor!: "+pt);
-            msgt.convertAndSend("/topic/newpoint."+numdibujo,pt);
-        }
+       synchronized(poligonos){
+           if(!poligonos.containsKey(numdibujo)){
+               poligonos.put(numdibujo,new ArrayList<Point>());
+           }
+           else{
+               poligonos.get(numdibujo).add(pt);
+               System.out.println("Nuevo punto recibido en el servidor!: "+pt);
+               msgt.convertAndSend("/topic/newpoint."+numdibujo,pt);
+           }
 
-        if(poligonos.get(numdibujo).size()>=2){
-            System.out.println("Nuevo poligono recibido en el servidor!: "+poligonos.get(numdibujo));
-            msgt.convertAndSend("/topic/newpolygon."+numdibujo, poligonos.get(numdibujo));
+           if(poligonos.get(numdibujo).size()>=3){
+               System.out.println("Nuevo poligono recibido en el servidor!: "+poligonos.get(numdibujo));
+               msgt.convertAndSend("/topic/newpolygon."+numdibujo, poligonos.get(numdibujo));
+           }
         }
 
 

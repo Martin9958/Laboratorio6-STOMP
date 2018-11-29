@@ -17,6 +17,20 @@ var app = (function () {
         ctx.arc(point.x, point.y, 1, 0, 2 * Math.PI);
         ctx.stroke();
     };
+
+    var addPolygonToCanvas = function (eventbody){
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+        var polygon=JSON.parse(eventbody.body);
+        ctx.fillStyle = '#2629ff';
+        ctx.beginPath();
+        ctx.moveTo(polygon[0].x,polygon[0].y);
+        for (var i=1;i<polygon.length;i++) {
+            ctx.lineTo(polygon[i].x,polygon[i].y);
+        }
+        ctx.closePath();
+        ctx.fill();
+    };
     
     
     var getMousePosition = function (evt) {
@@ -35,12 +49,15 @@ var app = (function () {
         stompClient = Stomp.over(socket);
         
         //subscribe to /topic/TOPICXX when connections succeed
-        stompClient.connect({}, function (frame) {
+        stompClient.connect({}, async function (frame) {
             console.log('Connected: ' + frame);
-            stompClient.subscribe('/topic/newpoint.' + topic, function (eventbody) {
+            await stompClient.subscribe('/topic/newpoint.' + topic, function (eventbody) {
                 var theObject=JSON.parse(eventbody.body);
                 //alert("coordenada x : " + theObject.x + "  coordenada y :" + theObject.y);
                 addPointToCanvas(new Point(theObject.x,theObject.y));
+            });
+            stompClient.subscribe('/topic/newpolygon.' + topic, async function (eventbody){
+                addPolygonToCanvas(eventbody);
             });
         });
 
